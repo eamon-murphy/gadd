@@ -46,8 +46,12 @@ func printResult(query string, matches []string) {
 		fmt.Println(query + " not found.")
 
 	case 1:
-		fmt.Println("unique match")
-		fmt.Println(matches[0])
+		error := gitAdd(matches[0])
+		if error != nil {
+			fmt.Println(error)
+			return
+		}
+		fmt.Println("added file:", matches[0])
 
 	default:
 		fmt.Println("ambiguous match")
@@ -86,4 +90,15 @@ func getGitFiles() []string {
 	}
 
 	return files
+}
+
+func gitAdd(path string) error {
+	cmd := exec.Command("git", "add", path)
+
+	error := cmd.Run()
+	if error != nil {
+		return error
+	}
+
+	return nil
 }
