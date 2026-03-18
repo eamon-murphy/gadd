@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -14,12 +16,7 @@ func main() {
 
 	query := normalizePath(os.Args[1])
 
-	candidates := []string{
-		"this/directory/ok/file.go",
-		"this/directory/file.go",
-		"some/directory/file.go",
-		"README.md",
-	}
+	candidates := getGitFiles()
 
 	matches := findMatches(query, candidates)
 
@@ -58,4 +55,35 @@ func printResult(query string, matches []string) {
 			fmt.Println(" -", match)
 		}
 	}
+}
+
+func getGitFiles() []string {
+	cmd := exec.Command("git", "ls-files")
+
+	var out bytes.Buffer
+	var errout bytes.Buffer
+
+	cmd.Stdout = &out
+	cmd.Stderr = &errout
+
+	error := cmd.Run()
+	if error != nil {
+		fmt.Println("git error:", errout.String())
+		return nil
+	}
+
+	output := strings.TrimSpace(out.String())
+
+	if output == "" {
+		return []string{}
+	}
+
+	fileList := strings.Split(output, "\n")
+
+	var files []string
+	for _, file := range fileList {
+		files = append(files, normalizePath(file))
+	}
+
+	return files
 }
