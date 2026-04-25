@@ -14,13 +14,15 @@ func main() {
 		return
 	}
 
-	query := normalizePath(os.Args[1])
-
 	candidates := getGitFiles()
 
-	matches := findMatches(query, candidates)
+	queries := os.Args[1:]
 
-	printResult(query, matches)
+	for _, query := range queries {
+		query = normalizePath(query)
+		matches := findMatches(query, candidates)
+		printResult(query, matches)
+	}
 }
 
 func normalizePath(path string) string {
