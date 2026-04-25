@@ -42,6 +42,26 @@ func findMatches(query string, candidates []string) []string {
 	return matches
 }
 
+func shortestUniqueSuffix(path string, allMatches []string) string {
+	parts := strings.Split(path, "/")
+
+	for i := len(parts) - 1; i >= 0; i-- {
+		suffix := strings.Join(parts[i:], "/")
+
+		count := 0
+		for _, other := range allMatches {
+			if other == suffix || strings.HasSuffix(other, "/"+suffix) {
+				count++
+			}
+		}
+		if count == 1 {
+			return suffix
+		}
+	}
+
+	return path
+}
+
 func printResult(query string, matches []string) {
 	switch len(matches) {
 	case 0:
@@ -58,7 +78,7 @@ func printResult(query string, matches []string) {
 	default:
 		fmt.Println("ambiguous match")
 		for _, match := range matches {
-			fmt.Println(" -", match)
+			fmt.Println(" -", shortestUniqueSuffix(match, matches))
 		}
 	}
 }
